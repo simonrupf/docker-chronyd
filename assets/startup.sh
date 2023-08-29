@@ -74,4 +74,4 @@ done
 } >> ${CHRONY_CONF_FILE}
 
 ## startup chronyd in the foreground
-exec /usr/sbin/chronyd -u chrony -d -x -L ${LOG_LEVEL}
+exec /usr/sbin/chronyd -u chrony -d -L ${LOG_LEVEL} $@
