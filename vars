@@ -15,6 +15,9 @@ NTP_SERVERS="0.pool.ntp.org,1.pool.ntp.org,2.pool.ntp.org,3.pool.ntp.org"
 # (optional) enable NTS in the chronyd configuration file
 ENABLE_NTS=false
 
+# (optional) enable control of system clock
+ENABLE_SYSCLK=false
+
 # (optional) turn on noclientlog option
 NOCLIENTLOG=false
 

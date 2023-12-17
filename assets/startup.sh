@@ -80,5 +80,11 @@ done
   echo "allow all"
 } >> ${CHRONY_CONF_FILE}
 
+# enable control of system clock, disabled by default
+SYSCLK="-x"
+if [[ "${ENABLE_SYSCLK:-false}" = true ]]; then
+  SYSCLK=""
+fi
+
 ## startup chronyd in the foreground
-exec /usr/sbin/chronyd -u chrony -d -x -L ${LOG_LEVEL}
+exec /usr/sbin/chronyd -u chrony -d ${SYSCLK} -L ${LOG_LEVEL}

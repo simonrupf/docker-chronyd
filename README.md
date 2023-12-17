@@ -190,6 +190,25 @@ following during startup:
 > NTS-KE session with 164.67.62.194:4460 (tick.ucla.edu) timed out
 
 
+## Enable control of system clock
+
+This option enables the control of the system clock.
+
+By default, chronyd will not try to make any adjustments of the clock. It will assume the clock is free running
+and still track its offset and frequency relative to the estimated true time. This allows chronyd to run without
+the capability to adjust or set the system clock in order to operate as an NTP server.
+
+Enabling the control requires granting SYS_TIME capability and a container run-time allowing that access:
+
+```yaml
+  ...
+  cap_add:
+    - SYS_TIME
+  environment:
+    - ENABLE_SYSCLK=true
+    ...
+```
+
 ## Testing your NTP Container
 
 From any machine that has `ntpdate` you can query your new NTP container with the follow

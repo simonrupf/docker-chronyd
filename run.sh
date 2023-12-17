@@ -18,8 +18,10 @@ function start_container() {
               --publish=123:123/udp                \
               --env=NTP_SERVERS=${NTP_SERVERS}     \
               --env=ENABLE_NTS=${ENABLE_NTS}       \
+              --env=ENABLE_SYSCLK=${ENABLE_SYSCLK} \
               --env=NOCLIENTLOG=${NOCLIENTLOG}     \
               --env=LOG_LEVEL=${LOG_LEVEL}         \
+              --cap-add=SYS_TIME                   \
               --read-only=true                     \
               --tmpfs=/etc/chrony:rw,mode=1750     \
               --tmpfs=/run/chrony:rw,mode=1750     \
