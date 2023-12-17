@@ -51,13 +51,17 @@ for N in $NTP_SERVERS; do
 
   # check if ntp server has a 127.0.0.0/8 address (RFC3330) indicating it's
   # the local system clock
-  if [[ "${N_CLEANED}" == *"127\."* ]]; then
+  if [[ "${N_CLEANED}" == "127\."* ]]; then
     echo "server "${N_CLEANED} >> ${CHRONY_CONF_FILE}
     echo "local stratum 10"    >> ${CHRONY_CONF_FILE}
 
   # found external time servers
   else
-    echo "server "${N_CLEANED}" iburst" >> ${CHRONY_CONF_FILE}
+    if [[ "${ENABLE_NTS:-false}" = true ]]; then
+      echo "server "${N_CLEANED}" iburst nts" >> ${CHRONY_CONF_FILE}
+    else
+      echo "server "${N_CLEANED}" iburst" >> ${CHRONY_CONF_FILE}
+    fi
   fi
 done
 
@@ -68,6 +72,9 @@ done
   echo "makestep 0.1 3"
   if [ -n "${NTP_DIRECTIVES}" ]; then
     echo -e "${NTP_DIRECTIVES}"
+  fi
+  if [ "${NOCLIENTLOG:-false}" = true ]; then
+    echo "noclientlog"
   fi
   echo
   echo "allow all"
