@@ -8,6 +8,8 @@ services:
     restart: always
     ports:
       - 123:123/udp
+#     devices:
+#       - /dev/ptp0:/dev/ptp0
     environment:
       - NTP_SERVERS=time.cloudflare.com
       - LOG_LEVEL=0
