@@ -209,6 +209,28 @@ Enabling the control requires granting SYS_TIME capability and a container run-t
     ...
 ```
 
+## Enable the use of a PTP clock
+
+If you have a `/dev/ptp0`, either a real hardware clock or virtual one provided by a VM host
+you can enable the use of it by passing the device to the container. As an example,
+using `docker-compose.yaml`, that would look like this:
+
+```yaml
+  ...
+  devices:
+    - /dev/ptp0:/dev/ptp0
+```
+
+This will allow chronyd to use the PTP clock as a reference clock. A virtual clock simply provides
+the host's system time with great precision and stability; whether that time is accurate depends
+on the host provider. In our experience, some VPS vendors give pretty good time (off by
+milliseconds), while others are off by seconds.
+
+For information on configuring the host to have a virtual PTP clock, see the following:
+
+ * https://opensource.com/article/17/6/timekeeping-linux-vms
+
+
 ## Testing your NTP Container
 
 From any machine that has `ntpdate` you can query your new NTP container with the follow
