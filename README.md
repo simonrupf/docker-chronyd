@@ -125,12 +125,15 @@ NTP_SERVERS="ntp1.aliyun.com,ntp2.aliyun.com,ntp3.aliyun.com,ntp4.aliyun.com"
 NTP_SERVERS="127.127.1.1"
 ```
 
-If you're interested in a public list of stratum 1 servers, you can have a look at the following list.
-Do make sure to verify the ntp server is active as this list does appaer to have some no longer active
-servers.
+If you're interested in a public list of stratum 1 servers, you can have a look at the following lists.
 
- * https://www.advtimesync.com/docs/manual/stratum1.html
+ * https://www.advtimesync.com/docs/manual/stratum1.html (Do make sure to verify the ntp server is active
+   as this list does appaer to have some no longer active servers.)
+ * https://support.ntp.org/Servers/StratumOneTimeServers
 
+It can also be the case that your use-case does not require a stratum 1 server -- most use-cases don't!
+
+ * https://support.ntp.org/Servers/StratumTwoTimeServers
 
 ## Chronyd Options
 
