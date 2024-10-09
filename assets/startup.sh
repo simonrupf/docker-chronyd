@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 DEFAULT_NTP="0.pool.ntp.org,1.pool.ntp.org,2.pool.ntp.org,3.pool.ntp.org"
 CHRONY_CONF_FILE="/etc/chrony/chrony.conf"
@@ -44,8 +44,9 @@ else
   fi
 fi
 
-IFS="," read -ra ntp_servers <<< "$NTP_SERVERS"
-for N in "${ntp_servers[@]}"; do
+IFS=", "
+set -f
+for N in $NTP_SERVERS; do
   # strip any quotes found before or after ntp server
   N_CLEANED=${N//\"}
 
