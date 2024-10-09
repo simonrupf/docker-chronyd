@@ -38,13 +38,14 @@ if [ -z "${LOG_LEVEL}" ]; then
   LOG_LEVEL=0
 else
   # confirm log level is between 0-3, since these are the only log levels supported
-  if [ "${LOG_LEVEL}" -gt 3 ]; then
+  if [[ $LOG_LEVEL != [0123] ]]; then
     # level outside of supported range, let's set to default (0)
     LOG_LEVEL=0
   fi
 fi
 
-IFS=","
+IFS=", "
+set -f
 for N in $NTP_SERVERS; do
   # strip any quotes found before or after ntp server
   N_CLEANED=${N//\"}
@@ -52,15 +53,15 @@ for N in $NTP_SERVERS; do
   # check if ntp server has a 127.0.0.0/8 address (RFC3330) indicating it's
   # the local system clock
   if [[ "${N_CLEANED}" == "127\."* ]]; then
-    echo "server "${N_CLEANED} >> ${CHRONY_CONF_FILE}
+    echo "server ${N_CLEANED}" >> ${CHRONY_CONF_FILE}
     echo "local stratum 10"    >> ${CHRONY_CONF_FILE}
 
   # found external time servers
   else
     if [[ "${ENABLE_NTS:-false}" = true ]]; then
-      echo "server "${N_CLEANED}" iburst nts" >> ${CHRONY_CONF_FILE}
+      echo "server ${N_CLEANED} iburst nts" >> ${CHRONY_CONF_FILE}
     else
-      echo "server "${N_CLEANED}" iburst" >> ${CHRONY_CONF_FILE}
+      echo "server ${N_CLEANED} iburst" >> ${CHRONY_CONF_FILE}
     fi
   fi
 done
