@@ -38,14 +38,13 @@ if [ -z "${LOG_LEVEL}" ]; then
   LOG_LEVEL=0
 else
   # confirm log level is between 0-3, since these are the only log levels supported
-  if [[ $LOG_LEVEL != [0123] ]]; then
+  if expr "${LOG_LEVEL}" : [^0123] > /dev/null; then
     # level outside of supported range, let's set to default (0)
     LOG_LEVEL=0
   fi
 fi
 
-IFS=", "
-set -f
+IFS=","
 for N in $NTP_SERVERS; do
   # strip any quotes found before or after ntp server
   N_CLEANED=${N//\"}
