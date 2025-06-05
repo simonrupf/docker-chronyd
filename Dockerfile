@@ -12,7 +12,13 @@ ENV NTP_DIRECTIVES="ratelimit\nrtcsync"
 
 # install chrony
 RUN apk add --no-cache chrony tzdata && \
-    rm /etc/chrony/chrony.conf
+    rm /etc/chrony/chrony.conf && \
+    chmod 1750 /etc/chrony && \
+    mkdir /run/chrony && \
+    chown -R chrony:chrony /run/chrony && \
+    chmod 1750 /run/chrony && \
+    chown -R chrony:chrony /var/lib/chrony && \
+    chmod 1750 /var/lib/chrony
 
 # script to configure/startup chrony (ntp)
 COPY assets/startup.sh /bin/startup
