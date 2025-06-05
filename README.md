@@ -41,14 +41,14 @@ $> docker run --name=ntp            \
               simonrupf/chronyd
 
 # OR run ntp with higher security
-$> docker run --name=ntp                           \
-              --restart=always                     \
-              --detach                             \
-              --publish=123:123/udp                \
-              --read-only                          \
-              --tmpfs=/etc/chrony:rw,mode=1750     \
-              --tmpfs=/run/chrony:rw,mode=1750     \
-              --tmpfs=/var/lib/chrony:rw,mode=1750 \
+$> docker run --name=ntp                                           \
+              --restart=always                                     \
+              --detach                                             \
+              --publish=123:123/udp                                \
+              --read-only                                          \
+              --tmpfs=/etc/chrony:rw,mode=1750,uid=100,gid=101     \
+              --tmpfs=/run/chrony:rw,mode=1750,uid=100,gid=101     \
+              --tmpfs=/var/lib/chrony:rw,mode=1750,uid=100,gid=101 \
               simonrupf/chronyd
 ```
 
