@@ -131,4 +131,4 @@ if [[ "${ENABLE_SYSCLK:-false}" = true ]]; then
 fi
 
 ## startup chronyd in the foreground
-exec /usr/sbin/chronyd -u chrony -d ${SYSCLK} -L ${LOG_LEVEL}
+exec /usr/sbin/chronyd -U -u chrony -d ${SYSCLK} -L ${LOG_LEVEL}
