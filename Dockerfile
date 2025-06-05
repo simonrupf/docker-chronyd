@@ -27,6 +27,7 @@ COPY --chmod=0755 assets/startup.sh /bin/startup
 EXPOSE 123/udp
 
 # marking volumes that need to be writable
+# this will also create unnamed volumes on the host system
 VOLUME /etc/chrony /run/chrony /var/lib/chrony
 
 # let docker know how to test container health
