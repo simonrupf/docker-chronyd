@@ -1,5 +1,4 @@
-version: '3.9'
-
+---
 services:
   ntp:
     build: .
@@ -8,9 +7,9 @@ services:
     restart: always
     read_only: true
     tmpfs:
-      - /etc/chrony:rw,mode=1750
-      - /run/chrony:rw,mode=1750
-      - /var/lib/chrony:rw,mode=1750
+      - /etc/chrony:rw,mode=1750,uid=100,gid=101
+      - /run/chrony:rw,mode=1750,uid=100,gid=101
+      - /var/lib/chrony:rw,mode=1750,uid=100,gid=101
     ports:
       - 123:123/udp
 #    cap_add:

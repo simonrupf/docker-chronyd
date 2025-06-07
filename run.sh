@@ -25,20 +25,20 @@ function start_container() {
     echo "SYSCLK requested, adding SYS_TIME capability..."
     DOCKER_OPTS="${DOCKER_OPTS} --cap-add=SYS_TIME"
   fi
-  $DOCKER run --name=${CONTAINER_NAME}             \
-              --detach=true                        \
-              --restart=always                     \
-              --publish=123:123/udp                \
-              --env=NTP_SERVERS=${NTP_SERVERS}     \
-              --env=ENABLE_NTS=${ENABLE_NTS}       \
-              --env=ENABLE_SYSCLK=${ENABLE_SYSCLK} \
-              --env=NOCLIENTLOG=${NOCLIENTLOG}     \
-              --env=LOG_LEVEL=${LOG_LEVEL}         \
-              --read-only=true                     \
-              --tmpfs=/etc/chrony:rw,mode=1750     \
-              --tmpfs=/run/chrony:rw,mode=1750     \
-              --tmpfs=/var/lib/chrony:rw,mode=1750 \
-              ${DOCKER_OPTS}                       \
+  $DOCKER run --name=${CONTAINER_NAME}                             \
+              --detach=true                                        \
+              --restart=always                                     \
+              --publish=123:123/udp                                \
+              --env=NTP_SERVERS=${NTP_SERVERS}                     \
+              --env=ENABLE_NTS=${ENABLE_NTS}                       \
+              --env=ENABLE_SYSCLK=${ENABLE_SYSCLK}                 \
+              --env=NOCLIENTLOG=${NOCLIENTLOG}                     \
+              --env=LOG_LEVEL=${LOG_LEVEL}                         \
+              --read-only=true                                     \
+              --tmpfs=/etc/chrony:rw,mode=1750,uid=100,gid=101     \
+              --tmpfs=/run/chrony:rw,mode=1750,uid=100,gid=101     \
+              --tmpfs=/var/lib/chrony:rw,mode=1750,uid=100,gid=101 \
+              ${DOCKER_OPTS}                                       \
               ${IMAGE_NAME}:latest > /dev/null
 }
 

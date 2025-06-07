@@ -1,7 +1,46 @@
 #!/bin/sh
+set -eu
+
+## Script will be run as chrony user !
 
 DEFAULT_NTP="0.pool.ntp.org,1.pool.ntp.org,2.pool.ntp.org,3.pool.ntp.org"
 CHRONY_CONF_FILE="/etc/chrony/chrony.conf"
+
+echo "
+-------------------------------------
+ℹ️ Container Information
+-------------------------------------
+OS:            $(. /etc/os-release; echo "${PRETTY_NAME}")
+Docker user:   $(whoami)
+Docker uid:    $(id -u)
+Docker gid:    $(id -g)
+"
+
+CURRENT_USERGROUP="$(id -u):$(id -g)"
+CHRONY_USERGROUP="$(id -u chrony):$(id -g chrony)"
+
+if [ "$CURRENT_USERGROUP" != "$CHRONY_USERGROUP" ]; then
+  echo "[WARNING] Container running under a different user than recommended!"
+  echo ""
+fi
+
+# Check if existing volumes/folders are writable
+if [ ! -w "/etc/chrony" ] || [ ! -w "/run/chrony" ] || [ ! -w "/var/lib/chrony" ]; then
+  echo "
+It seems that the necessary folders are not writable by the container user ($CURRENT_USERGROUP).
+As this container is running as non-root, it cannot fix the permissions it self.
+
+Please remove the volumes or update them to be writable by $CURRENT_USERGROUP.
+Or run the container with 'user: \"0:0\"' so it will ran as root so it can fix itself.
+
+If using tmpfs update the config to:
+tmpfs:
+  - /etc/chrony:rw,mode=1750,uid=100,gid=101
+  - /run/chrony:rw,mode=1750,uid=100,gid=101
+  - /var/lib/chrony:rw,mode=1750,uid=100,gid=101
+"
+  exit 1
+fi
 
 # confirm correct permissions on chrony run directory
 if [ -d /run/chrony ]; then
@@ -92,4 +131,4 @@ if [[ "${ENABLE_SYSCLK:-false}" = true ]]; then
 fi
 
 ## startup chronyd in the foreground
-exec /usr/sbin/chronyd -u chrony -d ${SYSCLK} -L ${LOG_LEVEL}
+exec /usr/sbin/chronyd -U -u chrony -d ${SYSCLK} -L ${LOG_LEVEL}
