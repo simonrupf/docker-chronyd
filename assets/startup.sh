@@ -6,18 +6,20 @@ set -eu
 DEFAULT_NTP="0.pool.ntp.org,1.pool.ntp.org,2.pool.ntp.org,3.pool.ntp.org"
 CHRONY_CONF_FILE="/etc/chrony/chrony.conf"
 
+CURRENT_USER="$(id -u)"
+CURRENT_GROUP="$(id -g)"
+CURRENT_USERGROUP="$CURRENT_USER:$CURRENT_GROUP"
+CHRONY_USERGROUP="$(id -u chrony):$(id -g chrony)"
+
 echo "
 -------------------------------------
 ℹ️ Container Information
 -------------------------------------
 OS:            $(. /etc/os-release; echo "${PRETTY_NAME}")
 Docker user:   $(whoami)
-Docker uid:    $(id -u)
-Docker gid:    $(id -g)
+Docker uid:    $CURRENT_USER
+Docker gid:    $CURRENT_GROUP
 "
-
-CURRENT_USERGROUP="$(id -u):$(id -g)"
-CHRONY_USERGROUP="$(id -u chrony):$(id -g chrony)"
 
 if [ "$CURRENT_USERGROUP" != "$CHRONY_USERGROUP" ]; then
   echo "[WARNING] Container running under a different user than recommended!"
@@ -35,9 +37,9 @@ Or run the container with 'user: \"0:0\"' so it will ran as root so it can fix i
 
 If using tmpfs update the config to:
 tmpfs:
-  - /etc/chrony:rw,mode=1750,uid=100,gid=101
-  - /run/chrony:rw,mode=1750,uid=100,gid=101
-  - /var/lib/chrony:rw,mode=1750,uid=100,gid=101
+  - /etc/chrony:rw,mode=1750,uid=$CURRENT_USER,gid=$CURRENT_GROUP
+  - /run/chrony:rw,mode=1750,uid=$CURRENT_USER,gid=$CURRENT_GROUP
+  - /var/lib/chrony:rw,mode=1750,uid=$CURRENT_USER,gid=$CURRENT_GROUP
 "
   exit 1
 fi
@@ -67,17 +69,17 @@ fi
 
 
 # NTP_SERVERS environment variable is not present, so populate with default server
-if [ -z "${NTP_SERVERS}" ]; then
+if [ -z "${NTP_SERVERS:-}" ]; then
   NTP_SERVERS="${DEFAULT_NTP}"
 fi
 
 # LOG_LEVEL environment variable is not present, so populate with chrony default (0)
 # chrony log levels: 0 (informational), 1 (warning), 2 (non-fatal error) and 3 (fatal error)
-if [ -z "${LOG_LEVEL}" ]; then
+if [ -z "${LOG_LEVEL:-}" ]; then
   LOG_LEVEL=0
 else
   # confirm log level is between 0-3, since these are the only log levels supported
-  if expr "${LOG_LEVEL}" : [^0123] > /dev/null; then
+  if expr "${LOG_LEVEL}" : "[^0123]" > /dev/null; then
     # level outside of supported range, let's set to default (0)
     LOG_LEVEL=0
   fi
@@ -86,17 +88,17 @@ fi
 IFS=","
 for N in $NTP_SERVERS; do
   # strip any quotes found before or after ntp server
-  N_CLEANED=${N//\"}
+  N_CLEANED=$(printf "%s" "$N" | tr -d '"')
 
   # check if ntp server has a 127.0.0.0/8 address (RFC3330) indicating it's
   # the local system clock
-  if [[ "${N_CLEANED}" == "127\."* ]]; then
+  if echo "${N_CLEANED}" | grep -q '^127\.'; then
     echo "server ${N_CLEANED}" >> ${CHRONY_CONF_FILE}
     echo "local stratum 10"    >> ${CHRONY_CONF_FILE}
 
   # found external time servers
   else
-    if [[ "${ENABLE_NTS:-false}" = true ]]; then
+    if [ "${ENABLE_NTS:-false}" = true ]; then
       echo "server ${N_CLEANED} iburst nts" >> ${CHRONY_CONF_FILE}
     else
       echo "server ${N_CLEANED} iburst" >> ${CHRONY_CONF_FILE}
@@ -126,7 +128,7 @@ fi
 
 # enable control of system clock, disabled by default
 SYSCLK="-x"
-if [[ "${ENABLE_SYSCLK:-false}" = true ]]; then
+if [ "${ENABLE_SYSCLK:-false}" = true ]; then
   SYSCLK=""
 fi
 
