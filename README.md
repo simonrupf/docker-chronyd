@@ -21,6 +21,7 @@ Architectures officially supported by this Docker container. Simply pulling this
 ![Linux x86/i686](https://img.shields.io/badge/linux/386-green?style=flat-squareg)
 ![ARMv7 32-bit](https://img.shields.io/badge/linux/arm/v7-green?style=flat-square)
 ![ARMv6 32-bit](https://img.shields.io/badge/linux/arm/v6-green?style=flat-square)
+![RiscV 64-bit](https://img.shields.io/badge/linux/riscv64-green?style=flat-square)
 
 
 ## How to Run this container
