@@ -12,6 +12,8 @@ services:
       - /var/lib/chrony:rw,mode=1750,uid=100,gid=101
     ports:
       - 123:123/udp
+# if you'd like chronyd to synchronize your hosts clock, uncomment these settings
+#    user: "0:0"
 #    cap_add:
 #      - SYS_TIME
 #     devices:

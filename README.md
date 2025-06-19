@@ -202,10 +202,11 @@ By default, chronyd will not try to make any adjustments of the clock. It will a
 and still track its offset and frequency relative to the estimated true time. This allows chronyd to run without
 the capability to adjust or set the system clock in order to operate as an NTP server.
 
-Enabling the control requires granting SYS_TIME capability and a container run-time allowing that access:
+Enabling the control requires starting the service as root, granting SYS_TIME capability and a container run-time allowing that access:
 
 ```yaml
   ...
+  user: "0:0"
   cap_add:
     - SYS_TIME
   environment:
