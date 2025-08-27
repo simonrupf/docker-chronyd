@@ -29,6 +29,7 @@ function start_container() {
               --detach=true                                        \
               --restart=always                                     \
               --publish=123:123/udp                                \
+              --cap-add CAP_NET_BIND_SERVICE                       \
               --env=NTP_SERVERS=${NTP_SERVERS}                     \
               --env=ENABLE_NTS=${ENABLE_NTS}                       \
               --env=ENABLE_SYSCLK=${ENABLE_SYSCLK}                 \

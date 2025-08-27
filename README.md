@@ -35,10 +35,11 @@ Pull and run -- it's this simple.
 $> docker pull simonrupf/chronyd
 
 # run ntp
-$> docker run --name=ntp            \
-              --restart=always      \
-              --detach              \
-              --publish=123:123/udp \
+$> docker run --name=ntp                     \
+              --restart=always               \
+              --detach                       \
+              --publish=123:123/udp          \
+              --cap-add CAP_NET_BIND_SERVICE \
               simonrupf/chronyd
 
 # OR run ntp with higher security
@@ -46,6 +47,7 @@ $> docker run --name=ntp                                           \
               --restart=always                                     \
               --detach                                             \
               --publish=123:123/udp                                \
+              --cap-add CAP_NET_BIND_SERVICE                       \
               --read-only                                          \
               --tmpfs=/etc/chrony:rw,mode=1750,uid=100,gid=101     \
               --tmpfs=/run/chrony:rw,mode=1750,uid=100,gid=101     \
