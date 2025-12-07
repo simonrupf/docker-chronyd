@@ -165,8 +165,8 @@ Feel free to check out the project documentation for more information at:
 
 ## Setting your timezone
 
-By default the UTC timezone is used, however if you'd like to adjust your NTP server to be running in your
-local timezone, all you need to do is provide a `TZ` environment variable following the standard TZ data format.
+By default the UTC timezone is used, however if you'd like to adjust the included tools to display your local
+timezone, all you need to do is provide a `TZ` environment variable following the standard TZ data format.
 As an example, using `docker-compose.yaml`, that would look like this if you were located in Vancouver, Canada:
 
 ```yaml
@@ -176,6 +176,8 @@ As an example, using `docker-compose.yaml`, that would look like this if you wer
     ...
 ```
 
+Note that the chronyd service itself does *not* need or use this setting as the NTP protocol is in UTC and
+chronyd logs remain in UTC as well.
 
 ## Enable Network Time Security
 
