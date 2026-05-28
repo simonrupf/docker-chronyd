@@ -1,0 +1,4 @@
+#!/bin/sh
+# If chronyd ever exits, take the whole supervision tree down so Docker's
+# restart policy can recreate the container. (gpsd alone serves no purpose.)
+exec /usr/bin/s6-svscanctl -t /run/chrony/services

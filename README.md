@@ -240,6 +240,102 @@ For information on configuring the host to have a virtual PTP clock, see the fol
  * https://opensource.com/article/17/6/timekeeping-linux-vms
 
 
+## GPS reference clock (separate `-gps` image)
+
+A separate image variant — published as `simonrupf/chronyd:latest-gps` and
+`simonrupf/chronyd:<version>-gps` — adds `gpsd` and serves as a stratum-1
+NTP source when fed by a serial GPS receiver (e.g. a USB UART GPS dongle).
+It is built from `Dockerfile.gps` and is otherwise functionally identical
+to the default image, so all environment variables and volumes documented
+above still apply.
+
+The image bundles a tiny [s6](https://skarnet.org/software/s6/)
+supervision tree (`s6-svscan` as PID 1, one `s6-supervise` per daemon) so
+that `chronyd` and `gpsd` are cleanly co-supervised: signals are forwarded,
+a crashed `gpsd` is restarted automatically, and a crashed `chronyd` brings
+the container down so Docker's restart policy can recreate it.
+
+```yaml
+services:
+  ntp-gps:
+    image: simonrupf/chronyd:latest-gps
+    container_name: ntp
+    devices:
+      - /dev/ttyUSB0:/dev/ttyUSB0
+    environment:
+      - GPS_DEVICE=/dev/ttyUSB0     # required
+      - GPS_BAUD=9600               # default 9600
+      - GPS_REFCLOCK_OFFSET=0.0     # default 0.0; compensate serial latency
+      - GPS_PPS=false               # set true to also consume PPS via SHM seg 1
+    sysctls:
+      # gpsd 3.26 unconditionally binds an IPv6 listening socket; Docker
+      # disables IPv6 on container loopback by default, so without this
+      # sysctl gpsd exits with "Can't bind to IPv6/TCP port … Address not
+      # available". Alternative: use `network_mode: host`.
+      net.ipv6.conf.lo.disable_ipv6: "0"
+    ports:
+      - 123:123/udp
+    group_add:
+      - dialout                     # so the chrony user can read the serial device
+    restart: always
+```
+
+`docker run` equivalent of that sysctl:
+
+```
+--sysctl net.ipv6.conf.lo.disable_ipv6=0
+```
+
+When the image starts, the entrypoint generates `chrony.conf` (same logic
+as the default image) and additionally appends:
+
+```
+refclock SHM 0 refid GPS offset ${GPS_REFCLOCK_OFFSET} precision 1e-1
+```
+
+…and, when `GPS_PPS=true`, also:
+
+```
+refclock SHM 1 refid PPS precision 1e-7 prefer
+```
+
+`s6-svscan` then takes over as PID 1 and supervises:
+
+ * `chronyd`: same arguments as the default image (driven by `LOG_LEVEL`,
+   `ENABLE_SYSCLK`, etc.)
+ * `gpsd`: `gpsd -N -F /run/chrony/gpsd.sock -s ${GPS_BAUD} ${GPS_DEVICE}`
+
+### Healthcheck
+
+The healthcheck verifies **both** services:
+
+```
+chronyc -n tracking && [ "$(s6-svstat -u /run/chrony/services/gpsd)" = "true" ]
+```
+
+If `gpsd` dies persistently (e.g. the GPS is unplugged), `s6` keeps
+restarting it and Docker marks the container unhealthy after the default
+three consecutive failures. `chronyd` itself keeps running and continues
+to serve clients at stratum 2 from `NTP_SERVERS` until the receiver is
+back.
+
+### Permissions on the serial device
+
+The serial device must be readable by the `chrony` user. The easiest
+options are:
+
+ * `chmod g+r /dev/ttyUSB0 && chown :dialout /dev/ttyUSB0` on the host plus
+   `group_add: [dialout]` on the container, or
+ * run the container as root with `user: "0:0"` if you don't mind the
+   privilege.
+
+### Image size
+
+The `-gps` image is a few MB larger than the default image (`gpsd` + `s6`).
+If you don't need a GPS refclock, stick with `simonrupf/chronyd:latest` —
+the default image is unchanged.
+
+
 ## Testing your NTP Container
 
 From any machine that has `ntpdate` you can query your new NTP container with the follow
