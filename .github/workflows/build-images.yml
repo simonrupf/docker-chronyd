@@ -19,6 +19,16 @@ jobs:
     # This workflow is only of value for simonrupf/docker-chronyd repo and would always be skipped in forks
     if: github.repository == 'simonrupf/docker-chronyd'
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - variant: default
+            dockerfile: Dockerfile
+            suffix: ""
+          - variant: gps
+            dockerfile: Dockerfile.gps
+            suffix: "-gps"
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -38,6 +48,8 @@ jobs:
         with:
           # list of Docker images to use as base name for tags
           images: simonrupf/chronyd
+          flavor: |
+            suffix=${{ matrix.suffix }},onlatest=true
           tags: |
             # set latest tag for default branch
             type=raw,value=latest,enable={{is_default_branch}}
@@ -53,6 +65,7 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           context: .
+          file: ${{ matrix.dockerfile }}
           tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}
           platforms: linux/amd64,linux/386,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le,linux/s390x,linux/riscv64

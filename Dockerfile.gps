@@ -1,0 +1,44 @@
+FROM alpine:3.23
+
+ARG BUILD_DATE
+
+LABEL org.opencontainers.image.created="${BUILD_DATE}" \
+      org.opencontainers.image.authors="Simon Rupf <simon@rupf.net>" \
+      org.opencontainers.image.documentation=https://github.com/simonrupf/docker-chronyd \
+      org.opencontainers.image.description="chronyd with optional GPS reference clock via gpsd, supervised by s6"
+
+# default configuration
+ENV NTP_DIRECTIVES="ratelimit\nrtcsync"
+
+# install chrony, gpsd and s6 supervision
+RUN apk add --no-cache chrony gpsd s6 tzdata && \
+    rm /etc/chrony/chrony.conf && \
+    chmod 1750 /etc/chrony && \
+    mkdir /run/chrony && \
+    chown -R chrony:chrony /etc/chrony /run/chrony /var/lib/chrony && \
+    chmod 1750 /etc/chrony /run/chrony /var/lib/chrony
+
+# entrypoint generates chrony.conf then execs s6-svscan, which supervises
+# chronyd and gpsd as siblings (see assets/s6/services/). The service tree
+# is copied to /run/chrony/services at startup so s6 can write its
+# supervise/ state on an otherwise-read-only rootfs.
+COPY --chmod=0755 assets/startup-gps.sh /bin/startup
+COPY --chmod=0755 assets/s6 /etc/s6
+
+# ntp port
+EXPOSE 123/udp
+
+# marking volumes that need to be writable
+# this will also create unnamed volumes on the host system
+VOLUME /etc/chrony /run/chrony /var/lib/chrony
+
+# health: chronyd reachable AND gpsd supervised as up. A persistently dead
+# gpsd (e.g. unplugged GPS) is restarted by s6, but `s6-svstat -u` returns
+# false while it is between restarts, so Docker's default --retries=3 will
+# mark the container unhealthy on a sustained outage.
+HEALTHCHECK CMD chronyc -n tracking >/dev/null 2>&1 && \
+                [ "$(s6-svstat -u /run/chrony/services/gpsd)" = "true" ] || exit 1
+
+# start s6 as PID 1 (via the startup script, which generates chrony.conf first)
+USER chrony:chrony
+ENTRYPOINT [ "/bin/startup" ]

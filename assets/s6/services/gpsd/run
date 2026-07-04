@@ -1,0 +1,7 @@
+#!/bin/sh
+# Supervised by s6-supervise. GPSD_ARGS is set by the entrypoint
+# (assets/startup-gps.sh) from the GPS_DEVICE / GPS_BAUD env vars.
+# A missing/unplugged device makes gpsd exit; s6 will restart it (and the
+# healthcheck will fail), but chronyd is unaffected and keeps serving as
+# stratum 2 from NTP_SERVERS.
+exec /usr/sbin/gpsd ${GPSD_ARGS}

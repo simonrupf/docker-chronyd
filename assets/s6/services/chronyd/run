@@ -1,0 +1,4 @@
+#!/bin/sh
+# Supervised by s6-supervise. CHRONYD_ARGS is set by the entrypoint
+# (assets/startup-gps.sh) after it generates chrony.conf.
+exec /usr/sbin/chronyd ${CHRONYD_ARGS}
