@@ -29,6 +29,9 @@ jobs:
           - variant: gps
             dockerfile: Dockerfile.gps
             suffix: "-gps"
+          - variant: nts
+            dockerfile: Dockerfile.nts
+            suffix: "-nts"
     steps:
       - name: Checkout
         uses: actions/checkout@v7

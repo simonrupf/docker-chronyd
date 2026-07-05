@@ -11,7 +11,7 @@ LABEL org.opencontainers.image.created="${BUILD_DATE}" \
 ENV NTP_DIRECTIVES="ratelimit\nrtcsync"
 
 # install chrony, gpsd and s6 supervision
-RUN apk add --no-cache chrony gpsd s6 tzdata && \
+RUN apk add --no-cache chrony-nts gpsd s6 tzdata && \
     rm /etc/chrony/chrony.conf && \
     chmod 1750 /etc/chrony && \
     mkdir /run/chrony && \

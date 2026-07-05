@@ -179,7 +179,12 @@ As an example, using `docker-compose.yaml`, that would look like this if you wer
 Note that the chronyd service itself does *not* need or use this setting as the NTP protocol is in UTC and
 chronyd logs remain in UTC as well.
 
-## Enable Network Time Security
+## Enable Network Time Security (NTS, separate `-nts` image)
+                                                                                              
+A separate image variant, published as `simonrupf/chronyd:latest-nts` and `simonrupf/chronyd:<version>-nts` is
+published that adds chronyd compiled with NTS support. This was the default in builds of the image befor Alpine
+3.24, but got dropped due to needing
+[heavy dependencies](https://gitlab.alpinelinux.org/alpine/aports/-/commit/70b570d4095272ab926a2693fdfb09c62d016a0b).
 
 If **all** the `NTP_SERVERS` you have configured support NTS (Network Time Security) you can pass the `ENABLE_NTS=true`
 option to the container to enable it. As an example, using `docker-compose.yaml`, that would look like this:
