@@ -16,7 +16,7 @@ CHRONY_USERGROUP="$(id -u chrony):$(id -g chrony)"
 
 echo "
 -------------------------------------
-ℹ️ Container Information (GPS variant)
+ Container Information (GPS variant)
 -------------------------------------
 OS:            $(. /etc/os-release; echo "${PRETTY_NAME}")
 Docker user:   $(whoami)

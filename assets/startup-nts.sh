@@ -2,6 +2,8 @@
 set -eu
 
 ## Script will be run as chrony user !
+## NTS-enabled variant: generates chrony.conf (including "nts" option
+## if ENABLE_NTS=true is passed as an option in the environment)
 
 DEFAULT_NTP="0.pool.ntp.org,1.pool.ntp.org,2.pool.ntp.org,3.pool.ntp.org"
 CHRONY_CONF_FILE="/etc/chrony/chrony.conf"
@@ -13,7 +15,7 @@ CHRONY_USERGROUP="$(id -u chrony):$(id -g chrony)"
 
 echo "
 -------------------------------------
-ℹ️ Container Information
+ Container Information (NTS variant)
 -------------------------------------
 OS:            $(. /etc/os-release; echo "${PRETTY_NAME}")
 Docker user:   $(whoami)
